@@ -1,0 +1,15 @@
+@startuml
+repeat
+  :Start Background Task;
+  repeat
+  :Query the configured endpoint to get the ISS Position;
+  repeat while (response.status == 200 or retries >= 3?) is (No) not (Yes)
+  if(response.status == 200) then (Yes)
+  :Save the obtained ISS Position in the DB;
+  else (No)
+  endif
+  :Wait 20 seconds;
+
+repeat while (FastAPI Application is running)
+
+@enduml

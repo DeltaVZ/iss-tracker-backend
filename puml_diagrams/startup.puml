@@ -1,0 +1,9 @@
+@startuml
+
+start
+:Initialize DB;
+:Initialize Limiter;
+:Initialize Background Task scheduling;
+:The FastAPI app is ready to accept HTTP requests;
+stop
+@enduml

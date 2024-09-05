@@ -1,0 +1,61 @@
+@startuml
+
+
+
+:Handle HTTP Request;
+
+
+
+switch(Request Path)
+case (Request Path == /)
+if (Rate Limiter Enabled?) then (yes)
+  :Check Rate Limit Exceeded?;
+  if (Rate Limit Exceeded?) then (yes)
+    :Return 429 Response;
+    stop
+  endif
+endif
+  :Return Welcome Message JSON;
+  stop
+  case (Request Path == /iss/position)
+  if (Rate Limiter Enabled?) then (yes)
+  :Check Rate Limit Exceeded?;
+  if (Rate Limit Exceeded?) then (yes)
+    :Return 429 Response;
+    stop
+  endif
+endif
+    :Call get_latest_iss_position() from iss_crud;
+    if (Database Query Successful?) then (yes)
+      :Return ISS Position JSON;
+      if (Request query has detailed=true) then (yes)
+      :Return ISS Position JSON;
+    else (no)
+      :Create a simplified ISS Position JSON;
+      :Return the simplified ISS Position JSON;
+    endif
+    else (no)
+      :Return Error Response;
+    endif
+    stop
+     case (Request Path == /iss/sun)
+     if (Rate Limiter Enabled?) then (yes)
+  :Check Rate Limit Exceeded?;
+  if (Rate Limit Exceeded?) then (yes)
+    :Return 429 Response;
+    stop
+  endif
+endif
+      :Call get_iss_positions() from iss_crud;
+      if (Database Query Successful?) then (yes)
+        :Call get_daylight_time_windows() from time_windows_utils;
+        :Create JSON for Response;
+        :Return JSON;
+      else (no)
+        :Return Error Response;
+      endif
+      stop
+    case (default)
+      :Return Error Response;
+      stop
+@enduml

@@ -1,0 +1,58 @@
+@startuml classes
+set namespaceSeparator none
+class "ConfigUtils" as challenge.utils.config.config_utils.ConfigUtils {
+  __slots__ : list
+  _config : ConfigParser
+  _default_positions_time_window_seconds : str
+  _fast_api_section : str
+  _inbound_requests_section : str
+  _iss_position_url_key : str
+  _iss_router_rate_limit : str
+  _limits_enabled : str
+  _outbound_requests_section : str
+  _user_agent_key : str
+  _wait_time_key : str
+  __init__(config_path: str)
+  get_iss_position_url() -> str
+  get_iss_router_rate_limit() -> str
+  get_limits_enabled() -> bool
+  get_user_agent() -> str
+  get_wait_time() -> int
+}
+class "IssPosition" as challenge.database.schemas.IssPosition {
+  altitude : float
+  daynum : float
+  footprint : float
+  latitude : float
+  longitude : float
+  name : str
+  satellite_id : int
+  solar_lat : float
+  solar_lon : float
+  timestamp : datetime
+  units : str
+  velocity : float
+  visibility
+  from_json(json: dict)
+}
+class "IssPositionUpdater" as challenge.background_tasks.iss_position_updater.IssPositionUpdater {
+  __slots__ : list
+  _session
+  db : sessionmaker
+  headers : dict
+  iss_position_url : str
+  stop_schedule : bool
+  wait_time : int
+  __init__(db: SessionLocal, headers: dict, wait_time: int, iss_position_url: str, config_utils: ConfigUtils)
+  _get_default_headers(config_utils: ConfigUtils) -> dict
+  _is_wait_time_valid(wait_time) -> bool
+  run_iss_update_position_schedule() -> None
+  update_iss_position() -> None
+}
+class "Visibility" as challenge.database.models.visibility.Visibility {
+  name
+}
+challenge.database.models.visibility.Visibility --* challenge.database.schemas.IssPosition : visibility
+challenge.background_tasks.iss_position_updater.IssPositionUpdater ..> challenge.database.schemas.IssPosition: <<use>>
+challenge.background_tasks.iss_position_updater.IssPositionUpdater ..> challenge.utils.config.config_utils.ConfigUtils: <<use>>
+@enduml
